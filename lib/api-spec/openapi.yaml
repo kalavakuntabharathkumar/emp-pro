@@ -1,0 +1,1540 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: EMP Pro - Employee Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: employees
+    description: Employee management
+  - name: departments
+    description: Department management
+  - name: projects
+    description: Project tracking
+  - name: tasks
+    description: Task assignment
+  - name: timesheets
+    description: Timesheet management
+  - name: attendance
+    description: Attendance tracking
+  - name: performance
+    description: Performance reviews
+  - name: notifications
+    description: Notification system
+  - name: analytics
+    description: Analytics and reporting
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthToken"
+        "401":
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  # Employees
+  /employees:
+    get:
+      operationId: listEmployees
+      tags: [employees]
+      summary: List all employees
+      parameters:
+        - name: department_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: search
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmployeeListResponse"
+    post:
+      operationId: createEmployee
+      tags: [employees]
+      summary: Create employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+
+  /employees/{id}:
+    get:
+      operationId: getEmployee
+      tags: [employees]
+      summary: Get employee by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Employee
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    patch:
+      operationId: updateEmployee
+      tags: [employees]
+      summary: Update employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+    delete:
+      operationId: deleteEmployee
+      tags: [employees]
+      summary: Delete employee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Departments
+  /departments:
+    get:
+      operationId: listDepartments
+      tags: [departments]
+      summary: List all departments
+      responses:
+        "200":
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+    post:
+      operationId: createDepartment
+      tags: [departments]
+      summary: Create department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  /departments/{id}:
+    get:
+      operationId: getDepartment
+      tags: [departments]
+      summary: Get department by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Department
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+    patch:
+      operationId: updateDepartment
+      tags: [departments]
+      summary: Update department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  # Projects
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: department_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Tasks
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks
+      parameters:
+        - name: project_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: assignee_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: priority
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Timesheets
+  /timesheets:
+    get:
+      operationId: listTimesheets
+      tags: [timesheets]
+      summary: List timesheets
+      parameters:
+        - name: employee_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: project_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: date_from
+          in: query
+          schema:
+            type: ["string", "null"]
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: ["string", "null"]
+            format: date
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of timesheets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Timesheet"
+    post:
+      operationId: createTimesheet
+      tags: [timesheets]
+      summary: Create timesheet entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimesheetInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timesheet"
+
+  /timesheets/{id}:
+    patch:
+      operationId: updateTimesheet
+      tags: [timesheets]
+      summary: Update timesheet entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TimesheetUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timesheet"
+
+  /timesheets/{id}/approve:
+    post:
+      operationId: approveTimesheet
+      tags: [timesheets]
+      summary: Approve timesheet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Timesheet"
+
+  # Attendance
+  /attendance:
+    get:
+      operationId: listAttendance
+      tags: [attendance]
+      summary: List attendance records
+      parameters:
+        - name: employee_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: date_from
+          in: query
+          schema:
+            type: ["string", "null"]
+            format: date
+        - name: date_to
+          in: query
+          schema:
+            type: ["string", "null"]
+            format: date
+      responses:
+        "200":
+          description: List of attendance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Attendance"
+    post:
+      operationId: createAttendance
+      tags: [attendance]
+      summary: Record attendance (check-in)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttendanceInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+
+  /attendance/{id}/checkout:
+    post:
+      operationId: checkOut
+      tags: [attendance]
+      summary: Check out attendance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Checked out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendance"
+
+  # Performance
+  /performance:
+    get:
+      operationId: listPerformanceReviews
+      tags: [performance]
+      summary: List performance reviews
+      parameters:
+        - name: employee_id
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: period
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of performance reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PerformanceReview"
+    post:
+      operationId: createPerformanceReview
+      tags: [performance]
+      summary: Create performance review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerformanceReviewInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformanceReview"
+
+  /performance/{id}:
+    get:
+      operationId: getPerformanceReview
+      tags: [performance]
+      summary: Get performance review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Performance review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformanceReview"
+    patch:
+      operationId: updatePerformanceReview
+      tags: [performance]
+      summary: Update performance review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PerformanceReviewUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformanceReview"
+
+  # Notifications
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications for current user
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All marked as read
+
+  # Analytics
+  /analytics/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [analytics]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /analytics/attendance-summary:
+    get:
+      operationId: getAttendanceSummary
+      tags: [analytics]
+      summary: Attendance summary by month
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: Attendance summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceSummary"
+
+  /analytics/project-stats:
+    get:
+      operationId: getProjectStats
+      tags: [analytics]
+      summary: Project status distribution
+      responses:
+        "200":
+          description: Project statistics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectStat"
+
+  /analytics/department-headcount:
+    get:
+      operationId: getDepartmentHeadcount
+      tags: [analytics]
+      summary: Employee count per department
+      responses:
+        "200":
+          description: Department headcount
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentHeadcount"
+
+  /analytics/timesheet-hours:
+    get:
+      operationId: getTimesheetHours
+      tags: [analytics]
+      summary: Total hours logged per week
+      parameters:
+        - name: weeks
+          in: query
+          schema:
+            type: integer
+            default: 8
+      responses:
+        "200":
+          description: Timesheet hours trend
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimesheetHoursStat"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthToken:
+      type: object
+      required: [access_token, token_type, user]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserProfile"
+
+    UserProfile:
+      type: object
+      required: [id, email, full_name, role]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+          enum: [admin, employee]
+        avatar_url:
+          type: ["string", "null"]
+        department_id:
+          type: ["integer", "null"]
+        department_name:
+          type: ["string", "null"]
+        job_title:
+          type: ["string", "null"]
+
+    Employee:
+      type: object
+      required: [id, full_name, email, status, role, hire_date]
+      properties:
+        id:
+          type: integer
+        full_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        job_title:
+          type: ["string", "null"]
+        department_id:
+          type: ["integer", "null"]
+        department_name:
+          type: ["string", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        manager_name:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, on_leave]
+        role:
+          type: string
+          enum: [admin, employee]
+        hire_date:
+          type: string
+          format: date
+        salary:
+          type: ["number", "null"]
+        avatar_url:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    EmployeeInput:
+      type: object
+      required: [full_name, email, role, hire_date]
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        phone:
+          type: ["string", "null"]
+        job_title:
+          type: ["string", "null"]
+        department_id:
+          type: ["integer", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [active, inactive, on_leave]
+          default: active
+        role:
+          type: string
+          enum: [admin, employee]
+          default: employee
+        hire_date:
+          type: string
+          format: date
+        salary:
+          type: ["number", "null"]
+        avatar_url:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        full_name:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        job_title:
+          type: ["string", "null"]
+        department_id:
+          type: ["integer", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        status:
+          type: ["string", "null"]
+          enum: [active, inactive, on_leave, null]
+        role:
+          type: ["string", "null"]
+          enum: [admin, employee, null]
+        salary:
+          type: ["number", "null"]
+        avatar_url:
+          type: ["string", "null"]
+        address:
+          type: ["string", "null"]
+
+    EmployeeListResponse:
+      type: object
+      required: [items, total, page, page_size]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Employee"
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+
+    Department:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        head_id:
+          type: ["integer", "null"]
+        head_name:
+          type: ["string", "null"]
+        employee_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    DepartmentInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        head_id:
+          type: ["integer", "null"]
+
+    DepartmentUpdate:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        head_id:
+          type: ["integer", "null"]
+
+    Project:
+      type: object
+      required: [id, name, status, start_date]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [planning, in_progress, on_hold, completed, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        department_id:
+          type: ["integer", "null"]
+        department_name:
+          type: ["string", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        manager_name:
+          type: ["string", "null"]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: ["string", "null"]
+          format: date
+        budget:
+          type: ["number", "null"]
+        progress:
+          type: integer
+        task_count:
+          type: integer
+        completed_task_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    ProjectInput:
+      type: object
+      required: [name, start_date]
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [planning, in_progress, on_hold, completed, cancelled]
+          default: planning
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+          default: medium
+        department_id:
+          type: ["integer", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: ["string", "null"]
+          format: date
+        budget:
+          type: ["number", "null"]
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+          enum: [planning, in_progress, on_hold, completed, cancelled, null]
+        priority:
+          type: ["string", "null"]
+          enum: [low, medium, high, critical, null]
+        department_id:
+          type: ["integer", "null"]
+        manager_id:
+          type: ["integer", "null"]
+        end_date:
+          type: ["string", "null"]
+          format: date
+        budget:
+          type: ["number", "null"]
+        progress:
+          type: ["integer", "null"]
+
+    Task:
+      type: object
+      required: [id, title, status, priority, project_id]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [todo, in_progress, review, done, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        project_id:
+          type: integer
+        project_name:
+          type: ["string", "null"]
+        assignee_id:
+          type: ["integer", "null"]
+        assignee_name:
+          type: ["string", "null"]
+        assignee_avatar:
+          type: ["string", "null"]
+        due_date:
+          type: ["string", "null"]
+          format: date
+        estimated_hours:
+          type: ["number", "null"]
+        actual_hours:
+          type: ["number", "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    TaskInput:
+      type: object
+      required: [title, project_id, priority]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [todo, in_progress, review, done, cancelled]
+          default: todo
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        project_id:
+          type: integer
+        assignee_id:
+          type: ["integer", "null"]
+        due_date:
+          type: ["string", "null"]
+          format: date
+        estimated_hours:
+          type: ["number", "null"]
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+          enum: [todo, in_progress, review, done, cancelled, null]
+        priority:
+          type: ["string", "null"]
+          enum: [low, medium, high, critical, null]
+        assignee_id:
+          type: ["integer", "null"]
+        due_date:
+          type: ["string", "null"]
+          format: date
+        estimated_hours:
+          type: ["number", "null"]
+        actual_hours:
+          type: ["number", "null"]
+
+    Timesheet:
+      type: object
+      required: [id, employee_id, project_id, date, hours, status]
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        employee_name:
+          type: ["string", "null"]
+        project_id:
+          type: integer
+        project_name:
+          type: ["string", "null"]
+        task_id:
+          type: ["integer", "null"]
+        task_title:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        hours:
+          type: number
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        created_at:
+          type: string
+          format: date-time
+
+    TimesheetInput:
+      type: object
+      required: [project_id, date, hours]
+      properties:
+        employee_id:
+          type: ["integer", "null"]
+        project_id:
+          type: integer
+        task_id:
+          type: ["integer", "null"]
+        date:
+          type: string
+          format: date
+        hours:
+          type: number
+        description:
+          type: ["string", "null"]
+
+    TimesheetUpdate:
+      type: object
+      properties:
+        hours:
+          type: ["number", "null"]
+        description:
+          type: ["string", "null"]
+        task_id:
+          type: ["integer", "null"]
+
+    Attendance:
+      type: object
+      required: [id, employee_id, date, check_in, status]
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        employee_name:
+          type: ["string", "null"]
+        date:
+          type: string
+          format: date
+        check_in:
+          type: string
+          format: date-time
+        check_out:
+          type: ["string", "null"]
+          format: date-time
+        status:
+          type: string
+          enum: [present, absent, late, half_day, on_leave]
+        work_hours:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+
+    AttendanceInput:
+      type: object
+      required: [date]
+      properties:
+        employee_id:
+          type: ["integer", "null"]
+        date:
+          type: string
+          format: date
+        check_in:
+          type: ["string", "null"]
+          format: date-time
+        notes:
+          type: ["string", "null"]
+
+    PerformanceReview:
+      type: object
+      required: [id, employee_id, reviewer_id, period, overall_rating, status]
+      properties:
+        id:
+          type: integer
+        employee_id:
+          type: integer
+        employee_name:
+          type: ["string", "null"]
+        reviewer_id:
+          type: integer
+        reviewer_name:
+          type: ["string", "null"]
+        period:
+          type: string
+        overall_rating:
+          type: number
+        productivity_rating:
+          type: ["number", "null"]
+        quality_rating:
+          type: ["number", "null"]
+        teamwork_rating:
+          type: ["number", "null"]
+        communication_rating:
+          type: ["number", "null"]
+        goals_achieved:
+          type: ["integer", "null"]
+        goals_total:
+          type: ["integer", "null"]
+        comments:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [draft, submitted, acknowledged]
+        created_at:
+          type: string
+          format: date-time
+
+    PerformanceReviewInput:
+      type: object
+      required: [employee_id, period, overall_rating]
+      properties:
+        employee_id:
+          type: integer
+        period:
+          type: string
+        overall_rating:
+          type: number
+        productivity_rating:
+          type: ["number", "null"]
+        quality_rating:
+          type: ["number", "null"]
+        teamwork_rating:
+          type: ["number", "null"]
+        communication_rating:
+          type: ["number", "null"]
+        goals_achieved:
+          type: ["integer", "null"]
+        goals_total:
+          type: ["integer", "null"]
+        comments:
+          type: ["string", "null"]
+
+    PerformanceReviewUpdate:
+      type: object
+      properties:
+        overall_rating:
+          type: ["number", "null"]
+        productivity_rating:
+          type: ["number", "null"]
+        quality_rating:
+          type: ["number", "null"]
+        teamwork_rating:
+          type: ["number", "null"]
+        communication_rating:
+          type: ["number", "null"]
+        goals_achieved:
+          type: ["integer", "null"]
+        goals_total:
+          type: ["integer", "null"]
+        comments:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+          enum: [draft, submitted, acknowledged, null]
+
+    Notification:
+      type: object
+      required: [id, title, message, type, is_read, created_at]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [info, warning, success, error, task, attendance, timesheet, performance]
+        is_read:
+          type: boolean
+        link:
+          type: ["string", "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    DashboardStats:
+      type: object
+      required: [total_employees, active_employees, total_projects, active_projects, total_tasks, pending_timesheets, present_today, on_leave_today]
+      properties:
+        total_employees:
+          type: integer
+        active_employees:
+          type: integer
+        total_projects:
+          type: integer
+        active_projects:
+          type: integer
+        total_tasks:
+          type: integer
+        completed_tasks:
+          type: integer
+        pending_timesheets:
+          type: integer
+        present_today:
+          type: integer
+        on_leave_today:
+          type: integer
+        avg_performance_rating:
+          type: ["number", "null"]
+        recent_activities:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+
+    ActivityItem:
+      type: object
+      required: [id, type, message, created_at]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        message:
+          type: string
+        user_name:
+          type: ["string", "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    AttendanceSummary:
+      type: object
+      required: [week, present, absent, late]
+      properties:
+        week:
+          type: string
+        present:
+          type: integer
+        absent:
+          type: integer
+        late:
+          type: integer
+
+    ProjectStat:
+      type: object
+      required: [status, count]
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+
+    DepartmentHeadcount:
+      type: object
+      required: [department, count]
+      properties:
+        department:
+          type: string
+        count:
+          type: integer
+
+    TimesheetHoursStat:
+      type: object
+      required: [week, hours]
+      properties:
+        week:
+          type: string
+        hours:
+          type: number
